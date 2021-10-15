@@ -163,7 +163,7 @@
 
 /* Hardware Drivers Config */
 
-#define SOC_HUMMINGBIRD
+#define SOC_DEMOSOC
 
 /* Onboard Peripheral Drivers */
 
