@@ -43,7 +43,7 @@
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
 #define RT_CONSOLE_DEVICE_NAME "uart0"
-#define RT_VER_NUM 0x40003
+#define RT_VER_NUM 0x30105
 #define ARCH_RISCV
 
 /* RT-Thread Components */
@@ -129,6 +129,9 @@
 /* Wiced WiFi */
 
 
+/* CYW43012 WiFi */
+
+
 /* IoT Cloud */
 
 
@@ -137,8 +140,18 @@
 
 /* language packages */
 
+/* JSON: JavaScript Object Notation, a lightweight data-interchange format */
+
+
+/* XML: Extensible Markup Language */
+
 
 /* multimedia packages */
+
+/* LVGL: powerful and easy-to-use embedded GUI library */
+
+
+/* u8g2: a monochrome graphic library */
 
 
 /* tools packages */
@@ -146,8 +159,27 @@
 
 /* system packages */
 
+/* enhanced kernel services */
+
+
+/* acceleration: Assembly language or algorithmic acceleration packages */
+
+
+/* CMSIS: ARM Cortex-M Microcontroller Software Interface Standard */
+
+
+/* Micrium: Micrium software products porting for RT-Thread */
+
 
 /* peripheral libraries and drivers */
+
+/* sensors drivers */
+
+
+/* touch drivers */
+
+
+/* Kendryte SDK */
 
 #define PKG_USING_NUCLEI_SDK
 
@@ -155,15 +187,23 @@
 
 #define PKG_USING_NUCLEI_SDK_LATEST_VERSION
 
+/* AI packages */
+
+
+/* Signal Processing and Control Algorithm Packages */
+
+
 /* miscellaneous packages */
 
+/* project laboratory */
 
 /* samples: kernel and components samples */
 
 
-/* Hardware Drivers Config */
+/* entertainment: terminal games and other interesting software packages */
 
-#define SOC_DEMOSOC
+
+/* Hardware Drivers Config */
 
 /* Onboard Peripheral Drivers */
 
@@ -176,5 +216,6 @@
 
 /* Board extended module Drivers */
 
+#define SOC_DEMOSOC
 
 #endif
