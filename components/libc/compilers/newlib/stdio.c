@@ -63,8 +63,12 @@ int libc_stdio_set_console(const char* device_name, int mode)
             _GLOBAL_REENT->_stdout = std_console;
             _GLOBAL_REENT->_stderr = std_console;
         }
-
+#if defined(__NEWLIB__) && (__NEWLIB__ >= 4) && (__NEWLIB_MINOR__ >= 3)
+        // https://github.com/riscv-mcu/riscv-newlib/commit/44b60f0c4ba597c55dcac4f2d3119a3055c80ba1
+        // __sdidinit member is removed
+#else
         _GLOBAL_REENT->__sdidinit = 1;
+#endif
     }
 
     if (std_console) return fileno(std_console);
