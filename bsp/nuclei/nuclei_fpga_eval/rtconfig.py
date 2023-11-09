@@ -1,5 +1,6 @@
 import os
 import platform
+import subprocess
 
 # toolchains options
 ARCH='risc-v'
@@ -11,6 +12,7 @@ if os.getenv('RTT_CC'):
 
 if CROSS_TOOL == 'gcc':
     PLATFORM 	= 'gcc'
+    # TODO: change windows and linux path according to your toolchain settings
     if platform.system().lower() == "windows":
         EXEC_PATH 	= 'D:/NucleiStudio/toolchain/gcc/bin'
     else:
@@ -21,22 +23,29 @@ if CROSS_TOOL == 'gcc':
 else:
     print("CROSS_TOOL = %s not yet supported" % CROSS_TOOL)
 
-if os.getenv('RTT_EXEC_PATH'):
-	EXEC_PATH = os.getenv('RTT_EXEC_PATH')
+# Don't use RTT_EXEC_PATH, this is defined by RT-ENV tools, we need to use toolchain distributed by nuclei
+#if os.getenv('RTT_EXEC_PATH'):
+#	EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
 BUILD = 'debug'
 # Fixed configurations below
+# for Nuclei SDK >= 0.5.0, it should be set to evalsoc
 NUCLEI_SDK_SOC = "demosoc"
 NUCLEI_SDK_BOARD = "nuclei_fpga_eval"
 # Configurable options below
 # DOWNLOAD: https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download
 NUCLEI_SDK_DOWNLOAD = "ilm"
 # CORE: See https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#core
-NUCLEI_SDK_CORE = "nx600"
+NUCLEI_SDK_CORE = "n900fd"
 
 if PLATFORM == 'gcc':
-    # toolchains
+    # toolchain settings
+    # TODO: Choose proper toolchain prefix
+    # using Nuclei GNU Toolchain <= 2022.12
     PREFIX  = 'riscv-nuclei-elf-'
+    # When Using Nuclei GNU Toolchain >= 2023.10
+    #PREFIX  = 'riscv64-unknown-elf-'
+
     CC      = PREFIX + 'gcc'
     CXX     = PREFIX + 'g++'
     AS      = PREFIX + 'gcc'
@@ -67,6 +76,15 @@ if PLATFORM == 'gcc':
 
 DUMP_ACTION = OBJDUMP + ' -D -S $TARGET > rtt.asm\n'
 POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
+
+# if EXEC_PATH is not set, just get it via path
+if EXEC_PATH == '':
+    try:
+        tmp_gcc_sysroot = subprocess.check_output([CC, "-print-sysroot"], stderr=subprocess.STDOUT, shell=True).strip()
+        EXEC_PATH = os.path.abspath(os.path.join(tmp_gcc_sysroot, "..", "bin"))
+        print("Guessed EXEC_PATH of %s is %s" % (CC, EXEC_PATH))
+    except:
+        print("Error: Unable to find desired CC=%s in PATH" % (CC))
 
 def dist_handle(BSP_ROOT, dist_dir):
     import sys

@@ -18,7 +18,7 @@ AddOption('--run',
         nargs=1,
         action = 'store',
         default = "",
-        help = 'Upload or debug application using openocd')
+        help = 'Quick evaluate run target command, available targets: upload, debug, qemu')
 
 DefaultEnvironment(tools=[])
 env = Environment(tools = ['mingw'],
@@ -44,6 +44,9 @@ SDK_LIB = libraries_path_prefix
 Export('SDK_LIB')
 
 GDB = rtconfig.GDB
+QEMU = "qemu-system-riscv32"
+if "x" in rtconfig.NUCLEI_SDK_CORE:
+    QEMU = "qemu-system-riscv64"
 
 # prepare building environment
 objs = PrepareBuilding(env, RTT_ROOT)
@@ -68,7 +71,7 @@ DoBuilding(TARGET, objs)
 
 # Run upload or debug if --run=upload or --upload=debug
 run_target = GetOption('run')
-SUPPORT_RUN_TARGETS = ["upload", "debug"]
+SUPPORT_RUN_TARGETS = ["upload", "debug", "qemu"]
 if run_target in SUPPORT_RUN_TARGETS:
     if os.path.isfile(TARGET):
         if run_target == "upload":
@@ -85,6 +88,13 @@ if run_target in SUPPORT_RUN_TARGETS:
             print("Debug application {} using openocd and gdb".format(TARGET))
             print(debug_cmd)
             os.system(debug_cmd)
+        elif run_target == "qemu":
+            qemu_cmd = '{} -M nuclei_evalsoc,download={} -cpu nuclei-{}' \
+                ' -icount shift=0 -nodefaults -serial stdio -kernel {}'.\
+                    format(QEMU, rtconfig.NUCLEI_SDK_DOWNLOAD, rtconfig.NUCLEI_SDK_CORE, TARGET)
+            print("Run application {} on qemu".format(TARGET))
+            print(qemu_cmd)
+            os.system(qemu_cmd)
     else:
         print(TARGET + ' not exist, please run scons first!!')
     exit(0)
