@@ -1,10 +1,5 @@
 menu "Hardware Drivers Config"
 
-config SOC_HUMMINGBIRD
-    bool
-    select SOC_SERIES_HUMMINGBIRD
-    default y
-
 menu "Onboard Peripheral Drivers"
 
     config BSP_USING_UART_CONSOLE
