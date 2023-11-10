@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 # toolchains options
 ARCH='risc-v'
@@ -11,6 +12,9 @@ if os.getenv('RTT_CC'):
 if CROSS_TOOL == 'gcc':
     PLATFORM  = 'gcc'
     EXEC_PATH = 'D:/Software/Nuclei/gcc/bin'
+    if os.path.exists(EXEC_PATH) == False:
+        print("Warning: Toolchain path %s doesn't exist, assume it is already in PATH" % EXEC_PATH)
+        EXEC_PATH = '' # Don't set path if not exist
 else:
     print("CROSS_TOOL = {} not yet supported" % CROSS_TOOL)
 
@@ -25,8 +29,13 @@ NUCLEI_SDK_DOWNLOAD = "flashxip"
 NUCLEI_SDK_CORE = "n205"
 
 if PLATFORM == 'gcc':
-    # toolchains
+    # toolchain settings
+    # TODO: Choose proper toolchain prefix
+    # using Nuclei GNU Toolchain <= 2022.12
     PREFIX  = 'riscv-nuclei-elf-'
+    # When Using Nuclei GNU Toolchain >= 2023.10
+    #PREFIX  = 'riscv64-unknown-elf-'
+
     CC      = PREFIX + 'gcc'
     CXX     = PREFIX + 'g++'
     AS      = PREFIX + 'gcc'
@@ -57,6 +66,15 @@ if PLATFORM == 'gcc':
 
 DUMP_ACTION = OBJDUMP + ' -D -S $TARGET > rtt.asm\n'
 POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
+
+# if EXEC_PATH is not set, just get it via path
+if EXEC_PATH == '':
+    try:
+        tmp_gcc_sysroot = subprocess.check_output([CC, "-print-sysroot"], stderr=subprocess.STDOUT, shell=True).strip()
+        EXEC_PATH = os.path.abspath(os.path.join(tmp_gcc_sysroot, "..", "bin"))
+        print("Guessed EXEC_PATH of %s is %s" % (CC, EXEC_PATH))
+    except:
+        print("Error: Unable to find desired CC=%s in PATH" % (CC))
 
 def dist_handle(BSP_ROOT, dist_dir):
     import sys
