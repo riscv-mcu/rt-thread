@@ -27,6 +27,9 @@
 
 请根据[安装Nuclei RISC-V GCC Toolchain和OpenOCD](https://doc.nucleisys.com/nuclei_sdk/quickstart.html#setup-tools-and-environment) 来安装依赖的工具。
 
+> - 支持 Nuclei Studio <= 2022.12, Toolchain PREFIX=`riscv-nuclei-elf-`
+> - 支持 Nuclei Studio >= 2023.10, Toolchain PREFIX=`riscv64-unknown-elf-`
+
 ### 添加环境变量
 
 将Nuclei RISC-V GCC Toolchain和OpenOCD的环境变量进行设置。
@@ -34,12 +37,12 @@
 #### Windows
 
 假设工具安装在 **D:\NucleiStudio\toolchain**目录下, 则可以修改系统环境变量**PATH**,
-将**D:\NucleiStudio\toolchain\gcc\bin;D:\NucleiStudio\toolchain\openocd\bin;**增加到**PATH**中。
+将**D:\NucleiStudio\toolchain\gcc\bin;D:\NucleiStudio\toolchain\openocd\bin;D:\NucleiStudio\toolchain\qemu\bin;**增加到**PATH**中。
 
 或者在ENV工具命令行中运行
 
 ~~~cmd
-set PATH=D:\NucleiStudio\toolchain\gcc\bin;D:\NucleiStudio\toolchain\openocd\bin;%PATH%
+set PATH=D:\NucleiStudio\toolchain\gcc\bin;D:\NucleiStudio\toolchain\openocd\bin;D:\NucleiStudio\toolchain\qemu\bin;%PATH%
 ~~~
 
 #### Linux
@@ -48,13 +51,13 @@ set PATH=D:\NucleiStudio\toolchain\gcc\bin;D:\NucleiStudio\toolchain\openocd\bin
 来添加环境变量。
 
 ~~~bash
-export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bin:$PATH
+export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bin:~/NucleiStudio/toolchain/qemu/bin:$PATH
 ~~~
 
 或者在ENV工具命令行中运行
 
 ~~~bash
-export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bin:$PATH
+export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bin:~/NucleiStudio/toolchain/qemu/bin:$PATH
 ~~~
 
 **注意**: 对应的RISC-V GCC和OPENOCD的路径请替换成自己安装的路径。
@@ -63,7 +66,7 @@ export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bi
 
 ### 驱动设置
 
-驱动安装设置，请参考[Nuclei FPGA开发板介绍](https://nucleisys.com/upload/files/fpga/doc/Nuclei_FPGA_DebugKit_Intro_202012.pdf)
+驱动安装设置，请参考[Nuclei FPGA开发板介绍](https://nucleisys.com/developboard.php#ddr200t)
 
 ### 编译程序
 
@@ -73,9 +76,11 @@ export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bi
 
 **注意**: 请确保Nuclei GCC和Nuclei OpenOCD的路径设置正确无误。
 
-1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK**开发包
+> If you want to use Nuclei RISC-V Toolchain 2023.10, you need to change **PREFIX** to `riscv64-unknown-elf-` in `rtconfig.py`
+
+1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK*
 2. **可选**: 运行 ``menuconfig``来进行内核配置
-3. 运行 ``scons -c``清理之前的编译结果
+3. **务必** 运行 ``scons -c``清理之前的编译结果
 4. 根据你当前评估的Nuclei RISC-V内核情况，修改 ``rtconfig.py``中的``NUCLEI_SDK_CORE``和``NUCLEI_SDK_DOWNLOAD``参数。
    - ``NUCLEI_SDK_CORE``可选的参数为[Supported Nuclei Cores](https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#core)
    - ``NUCLEI_SDK_DOWNLOAD``可选的参数为``ilm``,``flash``或者``flashxip``, 关于该选项的说明参见[Supported Download Modes](https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download)
@@ -213,7 +218,10 @@ Continuing.
 * https://doc.nucleisys.com/nuclei_sdk/quickstart.html#debug-application
 
 为了更方便的进行调试, 也可以下载**Nuclei Studio**集成开发环境, 创建一个Debug Configuration, 选择编译好的
-ELF文件, 然后配置OPENOCD和GDB即可, OPENOCD配置文件路径为**bsp\nuclei\nuclei_fpga_eval\packages\nuclei_sdk-latest\SoC\demosoc\Board\nuclei_fpga_eval\openocd_demosoc.cfg**
+ELF文件, 然后配置OPENOCD和GDB即可, OPENOCD配置文件路径为
+
+- For Nuclei SDK < 0.5.0:  **bsp\nuclei\nuclei_fpga_eval\packages\nuclei_sdk-latest\SoC\demosoc\Board\nuclei_fpga_eval\openocd_demosoc.cfg**
+- For Nuclei SDK >= 0.5.0: **bsp\nuclei\nuclei_fpga_eval\packages\nuclei_sdk-latest\SoC\evalsoc\Board\nuclei_fpga_eval\openocd_evalsoc.cfg**
 
 
 ## 驱动支持情况
