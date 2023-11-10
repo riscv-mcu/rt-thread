@@ -60,6 +60,11 @@ else:
     print("ERROR: Nuclei SDK package is not yet downloaded, please execute <pkgs --update> in command line first!")
     exit(0)
 
+GDBREMOTE = "| openocd --pipe -f {}".format(openocd_cfg)
+if os.getenv('GDBREMOTE'):
+    GDBREMOTE = os.getenv('GDBREMOTE')
+    print("Using customized GDBREMOTE %s" % (GDBREMOTE))
+
 # include hal drivers
 hal_sconscript = os.path.join(libraries_path_prefix, bsp_library_type, 'HAL_Drivers', 'SConscript')
 
@@ -76,15 +81,15 @@ if run_target in SUPPORT_RUN_TARGETS:
     if os.path.isfile(TARGET):
         if run_target == "upload":
             upload_cmd = '{} {} -ex "set remotetimeout 240" \
-                    -ex "target remote | openocd --pipe -f {}" \
+                    -ex "target remote {}" \
                     --batch -ex "monitor halt" -ex "monitor flash protect 0 0 last off" -ex "load" \
-                    -ex "monitor resume" -ex "quit"'.format(GDB, TARGET, openocd_cfg)
+                    -ex "monitor resume" -ex "quit"'.format(GDB, TARGET, GDBREMOTE)
             print("Upload application {} using openocd and gdb".format(TARGET))
             print(upload_cmd)
             os.system(upload_cmd)
         elif run_target == "debug":
             debug_cmd = '{} {} -ex "set remotetimeout 240" \
-                    -ex "target remote | openocd --pipe -f {}"'.format(GDB, TARGET, openocd_cfg)
+                    -ex "target remote {}"'.format(GDB, TARGET, GDBREMOTE)
             print("Debug application {} using openocd and gdb".format(TARGET))
             print(debug_cmd)
             os.system(debug_cmd)
