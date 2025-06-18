@@ -7,21 +7,25 @@
 更多关于 **芯来科技FPGA评估板** 开发板的详细资料请参见:
 
 * [Nuclei DDR200T开发板](https://nucleisys.com/developboard.php#ddr200t)
-* [Nuclei MCU200T开发板](https://nucleisys.com/developboard.php#mcu200t)
-* [蜂鸟开发板](https://nucleisys.com/developboard.php#demosoc100t)
+* [Nuclei KU060开发板](https://nucleisys.com/developboard.php#hp060)
 
 ### 板载资源
 
 | 硬件 | 描述 |
 | ---  | --- |
-| 内核 | Nuclei RISC-V N/NX/UX 内核 |
+| 内核 | Nuclei RISC-V N/NX/UX 内核(200/300/600/900/1000 series) |
 | 架构 | RV32 or RV64 |
 | 主频 | 16MHz or uncertain freq |
 
 **注意**: 这个上面烧写的是FPGA bitstream文件，所以处理器内核版本根据型号来定，通过修改**rtconfig.py**中的**NUCLEI_SDK_CORE**.
 
-
 ## 工具安装
+
+在如下环境下验证可以正常工作:
+
+- [**Nuclei Studio 2025.02**](https://nucleisys.com/download.php)
+- [**Nuclei SDK 0.8.0-3-gd24c4e92**](https://github.com/Nuclei-Software/nuclei-sdk/tree/d24c4e9242ca8f7a4b85fc91edb08e555b97aedc)
+- [**RT-Thread env-windows-v1.5.2**](https://www.rt-thread.org/document/site/#/development-tools/env/env)
 
 ### 安装工具链
 
@@ -29,6 +33,7 @@
 
 > - 支持 Nuclei Studio <= 2022.12, Toolchain PREFIX=`riscv-nuclei-elf-`
 > - 支持 Nuclei Studio >= 2023.10, Toolchain PREFIX=`riscv64-unknown-elf-`
+
 
 ### 添加环境变量
 
@@ -70,15 +75,22 @@ export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bi
 
 ### 编译程序
 
-下载好[RT-Thread](https://github.com/RT-Thread/rt-thread)的代码和[ENV工具](https://www.rt-thread.org/document/site/tutorial/env-video/)以后。
+下载好[RT-Thread](https://github.com/riscv-mcu/rt-thread/issues/1)的代码和[ENV工具](https://www.rt-thread.org/document/site/#/development-tools/env/env)以后。
+
+~~~shell
+# eg. for nuclei/lts-v4.1.x branch
+git clone -b nuclei/lts-v4.1.x https://github.com/riscv-mcu/rt-thread.git
+~~~
+
+> **常见问题** 参见 https://github.com/riscv-mcu/rt-thread/issues/1
 
 按照ENV工具的教程, 在**rt-thread\bsp\nuclei\nuclei_fpga_eval**目录打开ENV工具命令行。
 
 **注意**: 请确保Nuclei GCC和Nuclei OpenOCD的路径设置正确无误。
 
-> If you want to use Nuclei RISC-V Toolchain 2023.10, you need to change **PREFIX** to `riscv64-unknown-elf-` in `rtconfig.py`
+> If you want to use Nuclei RISC-V Toolchain >= 2023.10, you need to change **PREFIX** to `riscv64-unknown-elf-` in `rtconfig.py`
 
-1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK*
+1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK*, 如果下载失败，可能需要先执行 `menuconfig` 命令来更新`.config`文件(注意需要保存)，因为依赖的SDK的位置可能被上游更新。
 2. **可选**: 运行 ``menuconfig``来进行内核配置
 3. **务必** 运行 ``scons -c``清理之前的编译结果
 4. 根据你当前评估的Nuclei RISC-V内核情况，修改 ``rtconfig.py``中的``NUCLEI_SDK_CORE``和``NUCLEI_SDK_DOWNLOAD``参数。
@@ -232,7 +244,7 @@ ELF文件, 然后配置OPENOCD和GDB即可, OPENOCD配置文件路径为
 
 **注:**
 
-- 适配RT-Thread的驱动框架的代码在 [../libraries/demosoc/HAL_Drivers](../libraries/demosoc/HAL_Drivers)目录下。
+- 适配RT-Thread的驱动框架的代码在 [../libraries/evalsoc/HAL_Drivers](../libraries/evalsoc/HAL_Drivers)目录下。
 - 如果有开发者想适配更多的驱动, 请在对应目录下增加驱动适配支持。
 - 目前串口读取功能在主频为8MHz情况下需要工作在57600bps, 目前发布的Bit一般都是16Mhz
 - 目前串口读取没有采用中断的方式进行，而是采用单独的任务来读取，等中断信号接入后可以直接中断方式读取

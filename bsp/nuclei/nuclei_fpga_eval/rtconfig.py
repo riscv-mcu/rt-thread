@@ -30,7 +30,7 @@ else:
 BUILD = 'debug'
 # Fixed configurations below
 # for Nuclei SDK >= 0.5.0, it should be set to evalsoc
-NUCLEI_SDK_SOC = "demosoc"
+NUCLEI_SDK_SOC = "evalsoc"
 NUCLEI_SDK_BOARD = "nuclei_fpga_eval"
 # Configurable options below
 # DOWNLOAD: https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download
@@ -42,9 +42,9 @@ if PLATFORM == 'gcc':
     # toolchain settings
     # TODO: Choose proper toolchain prefix
     # using Nuclei GNU Toolchain <= 2022.12
-    PREFIX  = 'riscv-nuclei-elf-'
+    # PREFIX  = 'riscv-nuclei-elf-'
     # When Using Nuclei GNU Toolchain >= 2023.10
-    #PREFIX  = 'riscv64-unknown-elf-'
+    PREFIX  = 'riscv64-unknown-elf-'
 
     CC      = PREFIX + 'gcc'
     CXX     = PREFIX + 'g++'
