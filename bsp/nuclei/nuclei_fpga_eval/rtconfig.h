@@ -123,6 +123,15 @@
 /* Wiced WiFi */
 
 
+/* CYW43012 WiFi */
+
+
+/* BL808 WiFi */
+
+
+/* CYW43439 WiFi */
+
+
 /* IoT Cloud */
 
 
@@ -145,9 +154,6 @@
 /* u8g2: a monochrome graphic library */
 
 
-/* PainterEngine: A cross-platform graphics application framework written in C language */
-
-
 /* tools packages */
 
 
@@ -167,6 +173,10 @@
 
 /* peripheral libraries and drivers */
 
+/* HAL & SDK Drivers */
+
+/* STM32 HAL & SDK Drivers */
+
 
 /* Kendryte SDK */
 
@@ -176,7 +186,16 @@
 
 #define PKG_USING_NUCLEI_SDK_LATEST_VERSION
 
+/* sensors drivers */
+
+
+/* touch drivers */
+
+
 /* AI packages */
+
+
+/* Signal Processing and Control Algorithm Packages */
 
 
 /* miscellaneous packages */
@@ -189,18 +208,41 @@
 /* entertainment: terminal games and other interesting software packages */
 
 
-/* Privated Packages of RealThread */
+/* Arduino libraries */
 
 
-/* Network Utilities */
+/* Projects and Demos */
 
 
-/* RT-Thread Smart */
+/* Sensors */
 
+
+/* Display */
+
+
+/* Timing */
+
+
+/* Data Processing */
+
+
+/* Data Storage */
+
+/* Communication */
+
+
+/* Device Control */
+
+
+/* Other */
+
+
+/* Signal IO */
+
+
+/* Uncategorized */
 
 /* Hardware Drivers Config */
-
-#define SOC_HUMMINGBIRD
 
 /* Onboard Peripheral Drivers */
 
@@ -213,6 +255,6 @@
 
 /* Board extended module Drivers */
 
-#define SOC_DEMOSOC
+#define SOC_NUCLEI_EVALSOC
 
 #endif

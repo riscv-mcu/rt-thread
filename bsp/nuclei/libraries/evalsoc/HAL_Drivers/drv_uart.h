@@ -15,17 +15,17 @@
 #include <drv_config.h>
 
 /* config class */
-struct hbird_uart_config
+struct evalsoc_uart_config
 {
     const char *name;
     UART_TypeDef *uart;
     IRQn_Type irqn;
 };
 
-/* hbird uart dirver class */
-struct hbird_uart
+/* evalsoc uart dirver class */
+struct evalsoc_uart
 {
-    struct hbird_uart_config *config;
+    struct evalsoc_uart_config *config;
     struct rt_serial_device serial;
 };
 
