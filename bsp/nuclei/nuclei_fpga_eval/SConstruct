@@ -1,6 +1,7 @@
 import os
 import sys
 import rtconfig
+import json
 
 if os.getenv('RTT_ROOT'):
     RTT_ROOT = os.getenv('RTT_ROOT')
@@ -56,6 +57,20 @@ rtconfig.BSP_LIBRARY_TYPE = bsp_library_type
 
 if hasattr(rtconfig, 'NUCLEI_SDK_OPENOCD_CFG'):
     openocd_cfg = rtconfig.NUCLEI_SDK_OPENOCD_CFG.replace('\\', '/')
+    try:
+        nuclei_sdk_root = openocd_cfg.split('/SoC/')[0]
+        nuclei_sdk_pkgjson = os.path.join(nuclei_sdk_root, 'package.json')
+        if os.path.isfile(nuclei_sdk_pkgjson):
+            with open(nuclei_sdk_pkgjson, 'r') as f:
+                pkg_info = json.load(f)
+                if 'version' in pkg_info:
+                    print("Nuclei SDK version: {}".format(pkg_info['version']))
+                else:
+                    print("Nuclei SDK package.json does not contain version information.")
+        else:
+            print("ERROR: Nuclei SDK package.json not found at {}".format(nuclei_sdk_pkgjson))
+    except:
+        pass
 else:
     print("ERROR: Nuclei SDK package is not yet downloaded, please execute <pkgs --update> in command line first!")
     exit(0)
@@ -66,8 +81,8 @@ if os.getenv('GDBREMOTE'):
     print("Using customized GDBREMOTE %s" % (GDBREMOTE))
 
 # include hal drivers
-# for evalsoc and demosoc, share same hal code located in libraries/demosoc
-hal_sconscript = os.path.join(libraries_path_prefix, 'demosoc', 'HAL_Drivers', 'SConscript')
+# for evalsoc and demosoc, share same hal code located in libraries/evalsoc
+hal_sconscript = os.path.join(libraries_path_prefix, 'evalsoc', 'HAL_Drivers', 'SConscript')
 
 if os.path.isfile(hal_sconscript):
     objs.extend(SConscript(hal_sconscript))
