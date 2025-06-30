@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+#ifndef RT_USING_SMP
 /* Scheduler utilities. */
 #define RT_YIELD()                                                              \
 {                                                                               \
@@ -29,6 +30,17 @@ extern "C" {
     __RWMB();                                                                   \
     __FENCE_I();                                                                \
 }
+#else
+#define RT_YIELD(cpuid)                                                              \
+{                                                                               \
+    /* Set a software interrupt(SWI) request to request a context switch on cpu cpuid. */    \
+    SysTimer_SetHartSWIRQ(cpuid);                                                        \
+    /* Barriers are normally not required but do ensure the code is completely  \
+    within the specified behaviour for the architecture. */                     \
+    __RWMB();                                                                   \
+    __FENCE_I();                                                                \
+}
+#endif
 
 extern void rt_hw_ticksetup(void);
 extern void rt_hw_taskswitch(void);

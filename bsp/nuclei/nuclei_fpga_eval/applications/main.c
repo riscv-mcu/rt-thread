@@ -32,7 +32,7 @@ void board_serial_init(void)
 int main(void)
 {
 #ifdef RT_USING_SERIAL
-    board_serial_init();
+    // board_serial_init();
 #endif  /* RT_USING_SERIAL */
 }
 

@@ -24,6 +24,7 @@
 /* Initial CSR MSTATUS value when thread created */
 #define RT_INITIAL_MSTATUS                      (MSTATUS_MPP | MSTATUS_MPIE | MSTATUS_FS_INITIAL)
 
+#ifndef RT_USING_SMP
 /**
  * @brief from thread used interrupt context switch
  *
@@ -39,6 +40,12 @@ volatile rt_ubase_t  rt_interrupt_to_thread   = 0;
  *
  */
 volatile rt_ubase_t rt_thread_switch_interrupt_flag = 0;
+#else
+volatile rt_ubase_t rt_from_threadsps[RT_CPUS_NR] = {0};
+volatile rt_ubase_t rt_to_threadsps[RT_CPUS_NR] = {0};
+volatile struct rt_thread *rt_to_threads[RT_CPUS_NR] = {RT_NULL};
+volatile rt_ubase_t rt_switch_req_flags[RT_CPUS_NR] = {0};
+#endif
 
 /**
  * @brief thread stack frame of saved context
@@ -119,6 +126,7 @@ rt_uint8_t *rt_hw_stack_init(void       *tentry,
     return stk;
 }
 
+#ifndef RT_USING_SMP
 /**
  * @brief Do rt-thread context switch in interrupt context
  *
@@ -145,6 +153,24 @@ void rt_hw_context_switch(rt_ubase_t from, rt_ubase_t to)
 {
     rt_hw_context_switch_interrupt(from, to);
 }
+#else
+void rt_hw_context_switch(rt_ubase_t from, rt_ubase_t to, struct rt_thread *to_thread)
+{
+    if (rt_switch_req_flags[to_thread->oncpu] == 0) {
+        rt_switch_req_flags[to_thread->oncpu] = 1;
+        rt_from_threadsps[to_thread->oncpu] = from;
+    }
+    rt_to_threads[to_thread->oncpu] = to_thread;
+    rt_to_threadsps[to_thread->oncpu] = to;
+    // Yield thread to cpu to_thread->oncpu
+    RT_YIELD(to_thread->oncpu);
+}
+
+void rt_hw_context_switch_interrupt(void *context, rt_ubase_t from, rt_ubase_t to, struct rt_thread *to_thread)
+{
+    rt_hw_context_switch(from, to, to_thread);
+}
+#endif
 
 /**
  * @brief shutdown CPU
@@ -174,12 +200,20 @@ void rt_hw_taskswitch(void)
 {
     /* Clear Software IRQ, A MUST */
     SysTimer_ClearSWIRQ();
+#ifndef RT_USING_SMP
     rt_thread_switch_interrupt_flag = 0;
     // make from thread to be to thread
     // If there is another swi interrupt triggered by other harts
     // not through rt_hw_context_switch or rt_hw_context_switch_interrupt
     // the task switch should just do a same task save and restore
     rt_interrupt_from_thread = rt_interrupt_to_thread;
+#else
+    extern void rt_cpus_lock_status_restore(struct rt_thread *thread);
+    unsigned long cpu_id = rt_hw_cpu_id();
+    rt_switch_req_flags[cpu_id] = 0;
+    rt_from_threadsps[cpu_id] = rt_to_threadsps[cpu_id];
+    rt_cpus_lock_status_restore((struct rt_thread *)rt_to_threads[cpu_id]);
+#endif
 }
 
 /**
@@ -235,6 +269,13 @@ void SysTick_Handler(void)
     /* leave interrupt */
     rt_interrupt_leave();
 }
+
+#ifdef RT_USING_SMP
+#undef rt_hw_interrupt_disable
+#undef rt_hw_interrupt_enable
+#define rt_hw_interrupt_disable rt_hw_local_irq_disable
+#define rt_hw_interrupt_enable  rt_hw_local_irq_enable
+#endif
 
 /**
  * @brief Disable cpu interrupt

@@ -34,7 +34,7 @@ NUCLEI_SDK_SOC = "evalsoc"
 NUCLEI_SDK_BOARD = "nuclei_fpga_eval"
 # Configurable options below
 # DOWNLOAD: https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download
-NUCLEI_SDK_DOWNLOAD = "ilm"
+NUCLEI_SDK_DOWNLOAD = "ddr"
 # CORE: See https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#core
 NUCLEI_SDK_CORE = "n900fd"
 
@@ -57,10 +57,10 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY  = PREFIX + 'objcopy'
 
-    CFLAGS  = ' -ffunction-sections -fdata-sections -fno-common '
+    CFLAGS  = ' -ffunction-sections -fdata-sections -fno-common -DSMP_CPU_CNT=2'
     AFLAGS  = CFLAGS
     LFLAGS  = ' --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,--gc-sections '
-    LFLAGS += ' -Wl,-cref,-Map=rtthread.map'
+    LFLAGS += ' -Wl,-cref,-Map=rtthread.map -Wl,--defsym=__SMP_CPU_CNT=2'
     LFLAGS  += ' -u _isatty -u _write -u _sbrk -u _read -u _close -u _fstat -u _lseek '
     CPATH   = ''
     LPATH   = ''

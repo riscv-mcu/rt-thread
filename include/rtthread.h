@@ -188,6 +188,7 @@ rt_thread_t rt_thread_idle_gethandler(void);
 void rt_system_scheduler_init(void);
 void rt_system_scheduler_start(void);
 
+
 void rt_schedule(void);
 void rt_schedule_insert_thread(struct rt_thread *thread);
 void rt_schedule_remove_thread(struct rt_thread *thread);
@@ -202,6 +203,7 @@ void rt_scheduler_switch_sethook(void (*hook)(struct rt_thread *tid));
 #endif
 
 #ifdef RT_USING_SMP
+void rt_schedule_cpu(int cpu_id);
 void rt_scheduler_ipi_handler(int vector, void *param);
 #endif
 

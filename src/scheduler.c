@@ -298,28 +298,26 @@ void rt_scheduler_ipi_handler(int vector, void *param)
  *        with the highest priority level in global ready queue or local ready queue,
  *        then switch to it.
  */
-void rt_schedule(void)
+void rt_schedule_cpu(int cpu_id)
 {
     rt_base_t level;
     struct rt_thread *to_thread;
     struct rt_thread *current_thread;
     struct rt_cpu    *pcpu;
-    int cpu_id;
 
     /* disable interrupt */
     level  = rt_hw_interrupt_disable();
 
-    cpu_id = rt_hw_cpu_id();
     pcpu   = rt_cpu_index(cpu_id);
     current_thread = pcpu->current_thread;
 
     /* whether do switch in interrupt */
-    if (pcpu->irq_nest)
-    {
-        pcpu->irq_switch_flag = 1;
-        rt_hw_interrupt_enable(level);
-        goto __exit;
-    }
+    // if (pcpu->irq_nest)
+    // {
+    //     pcpu->irq_switch_flag = 1;
+    //     rt_hw_interrupt_enable(level);
+    //     goto __exit;
+    // }
 
 #ifdef RT_USING_SIGNALS
     if ((current_thread->stat & RT_THREAD_STAT_MASK) == RT_THREAD_SUSPEND)
@@ -333,7 +331,7 @@ void rt_schedule(void)
     }
 #endif /* RT_USING_SIGNALS */
 
-    if (current_thread->scheduler_lock_nest == 1) /* whether lock scheduler */
+    if (current_thread->scheduler_lock_nest == 1 && pcpu->irq_nest <= 1) /* whether lock scheduler */
     {
         rt_ubase_t highest_ready_priority;
 
@@ -382,9 +380,13 @@ void rt_schedule(void)
 #endif /* RT_USING_OVERFLOW_CHECK */
 
                 RT_OBJECT_HOOK_CALL(rt_scheduler_switch_hook, (current_thread));
-
-                rt_hw_context_switch((rt_ubase_t)&current_thread->sp,
-                        (rt_ubase_t)&to_thread->sp, to_thread);
+                if (pcpu->irq_nest == 0) {
+                    rt_hw_context_switch((rt_ubase_t)&current_thread->sp,
+                            (rt_ubase_t)&to_thread->sp, to_thread);
+                } else  {
+                    rt_hw_context_switch_interrupt(NULL, (rt_ubase_t)&current_thread->sp,
+                                                   (rt_ubase_t)&to_thread->sp, to_thread);
+                }
             }
         }
     }
@@ -414,6 +416,17 @@ void rt_schedule(void)
 
 __exit:
     return ;
+}
+
+void rt_schedule(void)
+{
+    int cpu_id;
+
+    /* get current cpu id */
+    cpu_id = rt_hw_cpu_id();
+
+    /* do schedule on current cpu */
+    rt_schedule_cpu(cpu_id);
 }
 #else
 /**

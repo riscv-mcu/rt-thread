@@ -28,20 +28,23 @@ enum
 #endif
 };
 
+static void evalsoc_uart_isr(struct rt_serial_device *serial);
+void eclic_irq51_handler(void);
+
 static struct evalsoc_uart_config uart_config[] =
 {
 #ifdef BSP_USING_UART0
     {
         "uart0",
         UART0,
-        SOC_INT19_IRQn,
+        SOC_INT51_IRQn,
     },
 #endif
 #ifdef BSP_USING_UART1
     {
         "uart1",
         UART1,
-        SOC_INT20_IRQn,
+        SOC_INT52_IRQn,
     },
 #endif
 };
@@ -98,6 +101,7 @@ static rt_err_t evalsoc_control(struct rt_serial_device *serial, int cmd,
     case RT_DEVICE_CTRL_SET_INT:
         ECLIC_EnableIRQ(uart_cfg->irqn);
         ECLIC_SetShvIRQ(uart_cfg->irqn, ECLIC_NON_VECTOR_INTERRUPT);
+        ECLIC_SetVector(uart_cfg->irqn, (rv_csr_t)eclic_irq51_handler);
         ECLIC_SetLevelIRQ(uart_cfg->irqn, 1);
         uart_enable_rxint(uart_cfg->uart);
         break;
@@ -157,13 +161,14 @@ static void evalsoc_uart_isr(struct rt_serial_device *serial)
     RT_ASSERT(uart_cfg != RT_NULL);
 
     if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
+        uart_clear_status(uart_cfg->uart, UART_IP_RXIP_MASK);
         rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_IND);
     }
 }
 
 #ifdef BSP_USING_UART0
 
-void eclic_irq19_handler(void)
+void eclic_irq51_handler(void)
 {
     rt_interrupt_enter();
 
@@ -176,7 +181,7 @@ void eclic_irq19_handler(void)
 
 #ifdef BSP_USING_UART1
 
-void eclic_irq20_handler(void)
+void eclic_irq52_handler(void)
 {
     rt_interrupt_enter();
 
@@ -225,18 +230,18 @@ void rt_hw_serial_rcvtsk(void *parameter)
     struct evalsoc_uart_config *uart_cfg;
 
     while (1) {
-#ifdef BSP_USING_UART0
-    uart_cfg = uart_obj[UART0_INDEX].config;
-    if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
-        evalsoc_uart_isr(&uart_obj[UART0_INDEX].serial);
-    }
-#endif
-#ifdef BSP_USING_UART1
-    uart_cfg = uart_obj[UART1_INDEX].config;
-    if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
-        evalsoc_uart_isr(&uart_obj[UART1_INDEX].serial);
-    }
-#endif
+// #ifdef BSP_USING_UART0
+//     uart_cfg = uart_obj[UART0_INDEX].config;
+//     if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
+//         evalsoc_uart_isr(&uart_obj[UART0_INDEX].serial);
+//     }
+// #endif
+// #ifdef BSP_USING_UART1
+//     uart_cfg = uart_obj[UART1_INDEX].config;
+//     if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
+//         evalsoc_uart_isr(&uart_obj[UART1_INDEX].serial);
+//     }
+// #endif
         rt_thread_mdelay(50);
     }
 }
