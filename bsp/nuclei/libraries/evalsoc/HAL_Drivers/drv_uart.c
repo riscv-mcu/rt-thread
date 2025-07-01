@@ -12,7 +12,7 @@
 
 #ifdef RT_USING_SERIAL
 
-#if !defined(BSP_USING_UART0) && !defined(BSP_USING_UART1)
+#if !defined(BSP_USING_UART0)
     #error "Please define at least one BSP_USING_UARTx"
     /* this driver can be enabled at menuconfig -> 
     Hardware Drivers Config -> On-chip Peripheral Drivers -> Enable UART */
@@ -23,13 +23,12 @@ enum
 #ifdef BSP_USING_UART0
     UART0_INDEX,
 #endif
-#ifdef BSP_USING_UART1
-    UART1_INDEX,
-#endif
 };
 
 static void evalsoc_uart_isr(struct rt_serial_device *serial);
-void eclic_irq51_handler(void);
+void eclic_uart0_handler(void);
+
+#define SOC_UART0_IRQn SOC_INT51_IRQn
 
 static struct evalsoc_uart_config uart_config[] =
 {
@@ -37,14 +36,7 @@ static struct evalsoc_uart_config uart_config[] =
     {
         "uart0",
         UART0,
-        SOC_INT51_IRQn,
-    },
-#endif
-#ifdef BSP_USING_UART1
-    {
-        "uart1",
-        UART1,
-        SOC_INT52_IRQn,
+        SOC_UART0_IRQn,
     },
 #endif
 };
@@ -101,7 +93,6 @@ static rt_err_t evalsoc_control(struct rt_serial_device *serial, int cmd,
     case RT_DEVICE_CTRL_SET_INT:
         ECLIC_EnableIRQ(uart_cfg->irqn);
         ECLIC_SetShvIRQ(uart_cfg->irqn, ECLIC_NON_VECTOR_INTERRUPT);
-        ECLIC_SetVector(uart_cfg->irqn, (rv_csr_t)eclic_irq51_handler);
         ECLIC_SetLevelIRQ(uart_cfg->irqn, 1);
         uart_enable_rxint(uart_cfg->uart);
         break;
@@ -168,7 +159,7 @@ static void evalsoc_uart_isr(struct rt_serial_device *serial)
 
 #ifdef BSP_USING_UART0
 
-void eclic_irq51_handler(void)
+void eclic_uart0_handler(void)
 {
     rt_interrupt_enter();
 
@@ -179,18 +170,6 @@ void eclic_irq51_handler(void)
 
 #endif
 
-#ifdef BSP_USING_UART1
-
-void eclic_irq52_handler(void)
-{
-    rt_interrupt_enter();
-
-    evalsoc_uart_isr(&uart_obj[UART1_INDEX].serial);
-
-    rt_interrupt_leave();
-}
-
-#endif
 
 /* For Nuclei evalsoc Uart, when CPU freq is lower than 8M
    The uart read will only work on baudrate <= 57600.
@@ -221,30 +200,13 @@ int rt_hw_uart_init(void)
                                        &uart_obj[index]);
         RT_ASSERT(result == RT_EOK);
     }
+#ifdef BSP_USING_UART0
+    ECLIC_SetVector(SOC_UART0_IRQn, (rv_csr_t)eclic_uart0_handler);
+#endif
 
     return result;
 }
 
-void rt_hw_serial_rcvtsk(void *parameter)
-{
-    struct evalsoc_uart_config *uart_cfg;
-
-    while (1) {
-// #ifdef BSP_USING_UART0
-//     uart_cfg = uart_obj[UART0_INDEX].config;
-//     if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
-//         evalsoc_uart_isr(&uart_obj[UART0_INDEX].serial);
-//     }
-// #endif
-// #ifdef BSP_USING_UART1
-//     uart_cfg = uart_obj[UART1_INDEX].config;
-//     if (uart_cfg->uart->IP & UART_IP_RXIP_MASK) {
-//         evalsoc_uart_isr(&uart_obj[UART1_INDEX].serial);
-//     }
-// #endif
-        rt_thread_mdelay(50);
-    }
-}
 
 #endif /* RT_USING_SERIAL */
 

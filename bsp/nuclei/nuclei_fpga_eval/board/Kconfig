@@ -19,9 +19,6 @@ menu "On-chip Peripheral Drivers"
             config BSP_USING_UART0
                 bool "Enable UART0"
                 default n
-            config BSP_USING_UART1
-                bool "Enable UART1"
-                default n
         endif
 
 endmenu
