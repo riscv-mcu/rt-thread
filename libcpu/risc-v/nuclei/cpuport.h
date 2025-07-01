@@ -28,7 +28,6 @@ extern "C" {
     /* Barriers are normally not required but do ensure the code is completely  \
     within the specified behaviour for the architecture. */                     \
     __RWMB();                                                                   \
-    __FENCE_I();                                                                \
 }
 #else
 #define RT_YIELD(cpuid)                                                              \
@@ -38,7 +37,6 @@ extern "C" {
     /* Barriers are normally not required but do ensure the code is completely  \
     within the specified behaviour for the architecture. */                     \
     __RWMB();                                                                   \
-    __FENCE_I();                                                                \
 }
 #endif
 
