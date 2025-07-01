@@ -75,7 +75,10 @@ else:
     print("ERROR: Nuclei SDK package is not yet downloaded, please execute <pkgs --update> in command line first!")
     exit(0)
 
-GDBREMOTE = "| openocd --pipe -f {}".format(openocd_cfg)
+if rtconfig.NUCLEI_SDK_SMP > 1:
+    GDBREMOTE = "| openocd --pipe -c 'set SMP {}' -f {}".format(rtconfig.NUCLEI_SDK_SMP, openocd_cfg)
+else:
+    GDBREMOTE = "| openocd --pipe -f {}".format(openocd_cfg)
 if os.getenv('GDBREMOTE'):
     GDBREMOTE = os.getenv('GDBREMOTE')
     print("Using customized GDBREMOTE %s" % (GDBREMOTE))
@@ -98,8 +101,9 @@ if run_target in SUPPORT_RUN_TARGETS:
         if run_target == "upload":
             upload_cmd = '{} {} -ex "set remotetimeout 240" \
                     -ex "target remote {}" \
-                    --batch -ex "monitor halt" -ex "monitor flash protect 0 0 last off" -ex "load" \
-                    -ex "monitor resume" -ex "quit"'.format(GDB, TARGET, GDBREMOTE)
+                    --batch -ex "monitor reset halt" -ex "thread apply all info reg pc" -ex "thread 1" \
+                    -ex "load {}" -ex "file {}" -ex "thread apply all set $pc=_start" \
+                    -ex "monitor resume" -ex "quit"'.format(GDB, TARGET, GDBREMOTE, TARGET, TARGET)
             print("Upload application {} using openocd and gdb".format(TARGET))
             print(upload_cmd)
             os.system(upload_cmd)
@@ -111,8 +115,9 @@ if run_target in SUPPORT_RUN_TARGETS:
             os.system(debug_cmd)
         elif run_target == "qemu":
             qemu_cmd = '{} -M nuclei_evalsoc,download={} -cpu nuclei-{}' \
-                ' -icount shift=0 -nodefaults -serial stdio -kernel {}'.\
-                    format(QEMU, rtconfig.NUCLEI_SDK_DOWNLOAD, rtconfig.NUCLEI_SDK_CORE, TARGET)
+                ' -icount shift=0 -nodefaults -smp {} -serial stdio -kernel {}'.\
+                    format(QEMU, rtconfig.NUCLEI_SDK_DOWNLOAD, rtconfig.NUCLEI_SDK_CORE, \
+                        rtconfig.NUCLEI_SDK_SMP, TARGET)
             print("Run application {} on qemu".format(TARGET))
             print(qemu_cmd)
             os.system(qemu_cmd)

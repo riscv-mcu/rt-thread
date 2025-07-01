@@ -90,8 +90,10 @@ git clone -b nuclei/lts-v4.1.x https://github.com/riscv-mcu/rt-thread.git
 
 > If you want to use Nuclei RISC-V Toolchain >= 2023.10, you need to change **PREFIX** to `riscv64-unknown-elf-` in `rtconfig.py`
 
-1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK*, 如果下载失败，可能需要先执行 `menuconfig` 命令来更新`.config`文件(注意需要保存)，因为依赖的SDK的位置可能被上游更新。
-2. **可选**: 运行 ``menuconfig``来进行内核配置
+1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK**, 如果下载失败，可能需要先执行 `menuconfig` 命令来更新`.config`文件(注意需要保存)，因为依赖的SDK的位置可能被上游更新。
+2. **可选**: 运行 ``menuconfig``来进行内核配置, 如果有SMP需求，则需要进行如下修改
+   - `menuconfig` 配置 `RT-Thread Kernel` -> `Enable SMP` + `Number of CPUs` 配置正确的CPU Core个数
+   - 修改 `rtconfig.py` 里面的 `NUCLEI_SDK_SMP` 为实际运行的CPU个数，如果是SMP运行，运行模式只能是sram或者ddr模式，为了确保所有core可以访问共享的存储区域
 3. **务必** 运行 ``scons -c``清理之前的编译结果
 4. 根据你当前评估的Nuclei RISC-V内核情况，修改 ``rtconfig.py``中的``NUCLEI_SDK_CORE``和``NUCLEI_SDK_DOWNLOAD``参数。
    - ``NUCLEI_SDK_CORE``可选的参数为[Supported Nuclei Cores](https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#core)
@@ -103,6 +105,19 @@ git clone -b nuclei/lts-v4.1.x https://github.com/riscv-mcu/rt-thread.git
 ### 下载程序
 
 在保证程序能够正常编译后, 在相同ENV终端执行``scons --run upload``进行代码的下载。
+
+如果硬件在远端，则可以设置 `GDBREMOTE` 环境变量，设置远端的gdb服务器和端口，例如
+
+~~~
+# 假设gdb服务器是 192.168.31.111 端口是22800
+# windows
+set GDBREMOTE="192.168.31.111:22800"
+# linux
+export GDBREMOTE="192.168.31.111:22800"
+# 然后再运行 scons --run upload 来下载代码
+~~~
+
+注意SMP的情况下，需要确认启动openocd的时候，也需要采用多核的配置文件。
 
 正常下载的输出如下:
 
