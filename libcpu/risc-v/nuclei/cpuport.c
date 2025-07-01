@@ -212,7 +212,10 @@ void rt_hw_taskswitch(void)
     unsigned long cpu_id = rt_hw_cpu_id();
     rt_switch_req_flags[cpu_id] = 0;
     rt_from_threadsps[cpu_id] = rt_to_threadsps[cpu_id];
-    rt_cpus_lock_status_restore((struct rt_thread *)rt_to_threads[cpu_id]);
+    struct rt_cpu* pcpu = rt_cpu_self();
+
+    pcpu->current_thread = (struct rt_thread *)rt_to_threads[cpu_id];
+    // rt_cpus_lock_status_restore((struct rt_thread *)rt_to_threads[cpu_id]);
 #endif
 }
 

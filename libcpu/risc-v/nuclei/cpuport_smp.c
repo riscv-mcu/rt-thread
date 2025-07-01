@@ -15,6 +15,14 @@
 #ifdef RT_USING_SMP
 volatile unsigned long smp_lockcnt[RT_CPUS_NR] = {0};
 volatile unsigned long smp_unlockcnt[RT_CPUS_NR] = {0};
+#define MAXCNT  1000000
+// volatile unsigned long lockidx = 0;
+// volatile unsigned long unlockidx = 0;
+// volatile uint8_t lockcore[MAXCNT] = {0};
+// volatile uint8_t unlockcore[MAXCNT] = {0};
+volatile unsigned long spinlockidx = 0;
+volatile uint8_t spinidx[MAXCNT] = {0};
+
 
 int rt_hw_cpu_id(void)
 {
@@ -31,8 +39,21 @@ void rt_hw_spin_lock_init(rt_hw_spinlock_t *lock)
 void rt_hw_spin_lock(rt_hw_spinlock_t *lock)
 {
     do {
+#if __riscv_xlen == 64
+        if (__AMOSWAP_D(&(lock->slock), (rt_hw_cpu_id() + 1)) == 0) {
+#else
         if (__AMOSWAP_W(&(lock->slock), (rt_hw_cpu_id() + 1)) == 0) {
+#endif
             smp_lockcnt[rt_hw_cpu_id()] ++;
+            // if (lockidx < MAXCNT) {
+            //     lockcore[lockidx] = rt_hw_cpu_id();
+            // }
+            // lockidx ++;
+            if (spinlockidx > MAXCNT) {
+                spinlockidx = 0;
+            }
+            spinidx[spinlockidx] = rt_hw_cpu_id() | 0x80;
+            spinlockidx ++;
             break;
         }
     } while (1);
@@ -42,8 +63,22 @@ void rt_hw_spin_lock(rt_hw_spinlock_t *lock)
 void rt_hw_spin_unlock(rt_hw_spinlock_t *lock)
 {
     smp_unlockcnt[rt_hw_cpu_id()] ++;
+    // if (unlockidx < MAXCNT) {
+    //     unlockcore[lockidx] = rt_hw_cpu_id();
+    // }
+    // unlockidx ++;
+    if (spinlockidx > MAXCNT) {
+        spinlockidx = 0;
+    }
+
+    spinidx[spinlockidx] = rt_hw_cpu_id();
+    spinlockidx ++;
+
+    // if (spinlockidx == 17) {
+    //     while (1);
+    // }
     lock->slock = 0;
-    // __SMP_RWMB();
+    __SMP_RWMB();
 }
 
 
