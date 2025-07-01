@@ -127,6 +127,7 @@ int smp_main(void)
         /* Initialize the tick timer on the primary CPU */
         entry();
     } else {
+        __disable_irq();
         while (secondary_boot_flag != 0xa55a) {
             /* Wait for the secondary CPU to be ready */
             __asm__ volatile ("nop");
