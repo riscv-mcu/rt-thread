@@ -171,10 +171,13 @@ eclic_msip_handler:
 
     /* Store sp to task stack */
 #ifdef RT_USING_SMP
-    LOAD t0, rt_from_threadsps
+    // t0 = &rt_to_threadsps[read_csr(CSR_MHARTID)];
+    // t0 = *t0;
+    la t0, rt_from_threadsps
     csrr t1, CSR_MHARTID
     slli t1, t1, LOG_REGBYTES
     add t0, t0, t1
+    LOAD t0, 0(t0)
 #else
     LOAD t0, rt_interrupt_from_thread
 #endif
@@ -186,10 +189,13 @@ eclic_msip_handler:
 
     /* Switch task context */
 #ifdef RT_USING_SMP
-    LOAD t0, rt_to_threadsps
+    // t0 = &rt_to_threadsps[read_csr(CSR_MHARTID)];
+    // t0 = *t0;
+    la t0, rt_to_threadsps
     csrr t1, CSR_MHARTID
     slli t1, t1, LOG_REGBYTES
     add t0, t0, t1
+    LOAD t0, 0(t0)
 #else
     LOAD t0, rt_interrupt_to_thread
 #endif
