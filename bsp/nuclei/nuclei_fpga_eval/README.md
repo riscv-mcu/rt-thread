@@ -75,6 +75,10 @@ export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bi
 
 ### 编译程序
 
+> [!NOTE]
+> 为了方便支持SMP架构，我们针对RT-Thread的SMP支持代码做了调整，主要是 `src/scheduler.c` 这个文件。
+> 代码变更查看方法: `git log -1 -p .\src\scheduler.c`
+
 下载好[RT-Thread](https://github.com/riscv-mcu/rt-thread/issues/1)的代码和[ENV工具](https://www.rt-thread.org/document/site/#/development-tools/env/env)以后。
 
 ~~~shell
