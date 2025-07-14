@@ -27,7 +27,7 @@ static rt_thread_t threads[RT_CPUS_NR];
 static struct rt_spinlock lock;
 static int thread_inc[RT_CPUS_NR] = {0};
 static int thread_tic[RT_CPUS_NR] = {0};
-static int finsh_flag = 0;
+static volatile int finsh_flag = 0;
 static int                num        = 0;
 
 static void thread_entry(void *parameter)

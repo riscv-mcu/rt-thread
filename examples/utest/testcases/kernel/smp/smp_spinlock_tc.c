@@ -23,7 +23,7 @@
 #define THREAD_STACK_SIZE UTEST_THR_STACK_SIZE
 static rt_thread_t        thread1;
 static rt_thread_t        thread2;
-static rt_uint8_t         finsh_flag = 0;
+static volatile rt_uint8_t         finsh_flag = 0;
 static struct rt_spinlock lock;
 static rt_uint8_t         number1, number2 = 0;
 

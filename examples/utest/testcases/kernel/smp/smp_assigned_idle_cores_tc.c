@@ -22,7 +22,7 @@
 #define THREAD_STACK_SIZE UTEST_THR_STACK_SIZE
 #define THREAD_PRIORITY   20
 static rt_thread_t threads[RT_CPUS_NR];
-static int         tick = 0, finsh_flag = 0;
+static volatile int         tick = 0, finsh_flag = 0;
 static int                num        = 0;
 /* thread entry function */
 static void thread_entry(void *parameter)
