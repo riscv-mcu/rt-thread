@@ -15,8 +15,13 @@ config SOC_RISCV_FAMILY_NUCLEI
 
 config SOC_NUCLEI_EVALSOC
     bool
-    # select ARCH_RISCV32
-    select ARCH_RISCV64
+    ## TODO select RV32 or RV64
+    ## according to your real SoC
+    select ARCH_RISCV32
+    # select ARCH_RISCV64
+    ## TODO enable ARCH_RISCV_FPU if you
+    ## want to save fpu stack during interrupt
+    ## exception or context switch
     # select ARCH_RISCV_FPU
     select SOC_RISCV_FAMILY_NUCLEI
     select PKG_USING_NUCLEI_SDK

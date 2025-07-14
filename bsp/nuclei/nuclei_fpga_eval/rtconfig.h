@@ -73,7 +73,7 @@
 #define RT_USING_HOOKLIST
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
-#define IDLE_THREAD_STACK_SIZE 2028
+#define IDLE_THREAD_STACK_SIZE 1024
 #define RT_USING_TIMER_SOFT
 #define RT_TIMER_THREAD_PRIO 4
 #define RT_TIMER_THREAD_STACK_SIZE 4096
@@ -119,14 +119,14 @@
 
 #define RT_USING_COMPONENTS_INIT
 #define RT_USING_USER_MAIN
-#define RT_MAIN_THREAD_STACK_SIZE 2048
+#define RT_MAIN_THREAD_STACK_SIZE 1024
 #define RT_MAIN_THREAD_PRIORITY 10
 #define RT_USING_MSH
 #define RT_USING_FINSH
 #define FINSH_USING_MSH
 #define FINSH_THREAD_NAME "tshell"
 #define FINSH_THREAD_PRIORITY 20
-#define FINSH_THREAD_STACK_SIZE 10000
+#define FINSH_THREAD_STACK_SIZE 4096
 #define FINSH_USING_HISTORY
 #define FINSH_HISTORY_LINES 5
 #define FINSH_USING_SYMTAB
@@ -192,8 +192,6 @@
 
 /* end of Interprocess Communication (IPC) */
 /* end of POSIX (Portable Operating System Interface) layer */
-#define RT_USING_CPLUSPLUS
-#define RT_USING_CPLUSPLUS11
 /* end of C/C++ and POSIX layer */
 
 /* Network */
@@ -206,9 +204,6 @@
 
 /* Utilities */
 
-#define RT_USING_UTEST
-#define UTEST_THR_STACK_SIZE 10240
-#define UTEST_THR_PRIORITY 20
 /* end of Utilities */
 
 /* Using USB legacy version */
@@ -218,65 +213,6 @@
 
 /* RT-Thread Utestcases */
 
-#define RT_USING_UTESTCASES
-
-/* Utest Self Testcase */
-
-#define UTEST_SELF_PASS_TC
-/* end of Utest Self Testcase */
-
-/* Kernel Testcase */
-
-#define UTEST_SMALL_MEM_TC
-#define UTEST_SEMAPHORE_TC
-#define UTEST_EVENT_TC
-#define UTEST_TIMER_TC
-#define UTEST_MESSAGEQUEUE_TC
-#define UTEST_SIGNAL_TC
-#define UTEST_MUTEX_TC
-#define UTEST_MAILBOX_TC
-#define UTEST_THREAD_TC
-#define UTEST_DEVICE_TC
-#define UTEST_ATOMIC_TC
-#define UTEST_HOOKLIST_TC
-#define UTEST_MTSAFE_KPRINT_TC
-#define UTEST_SCHEDULER_TC
-/* end of Kernel Testcase */
-
-/* CPP11 Testcase */
-
-#define UTEST_CPP11_THREAD_TC
-/* end of CPP11 Testcase */
-
-/* Utest Serial Testcase */
-
-/* end of Utest Serial Testcase */
-
-/* Serial-Bypass Testcase */
-
-/* end of Serial-Bypass Testcase */
-
-/* Utest IPC Testcase */
-
-#define UTEST_COMPLETION_TC
-#define UTEST_WORKQUEUE_TC
-/* end of Utest IPC Testcase */
-
-/* RTT Posix Testcase */
-
-/* end of RTT Posix Testcase */
-
-/* Memory Management Subsytem Testcase */
-
-/* end of Memory Management Subsytem Testcase */
-
-/* Tmpfs Testcase */
-
-/* end of Tmpfs Testcase */
-
-/* SMP-Call Testcase */
-
-/* end of SMP-Call Testcase */
 /* end of RT-Thread Utestcases */
 
 /* RT-Thread online packages */

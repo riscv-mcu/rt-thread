@@ -35,12 +35,13 @@ NUCLEI_SDK_BOARD = "nuclei_fpga_eval"
 # Configurable options below
 # TODO: Change NUCLEI_SDK_CORE NUCLEI_SDK_SMP and NUCLEI_SDK_DOWNLOAD according to your cpu configuration
 # CORE: See https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#core
-NUCLEI_SDK_CORE = "nx900"
+NUCLEI_SDK_CORE = "n900fd"
 # TODO: If you want to run RT-Thread SMP, you need to set NUCLEI_SDK_SMP to 2 or more to match your CPU count.
 # TODO: And you also need to execute `menuconfig` to enable SMP support in RT-Thread and set Number of CPUs to match NUCLEI_SDK_SMP.
-NUCLEI_SDK_SMP = 2
+NUCLEI_SDK_SMP = 1
 
 # DOWNLOAD: https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download
+# You can change the DOWNLOAD mode to use different linker script in nuclei sdk
 if NUCLEI_SDK_SMP > 1:
     # when run with SMP, ddr mode or sram mode is required
     NUCLEI_SDK_DOWNLOAD = "ddr"
@@ -74,7 +75,7 @@ if PLATFORM == 'gcc':
     LFLAGS  = ' --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,--gc-sections '
     LFLAGS += ' -Wl,-cref,-Map=rtthread.map '
     if NUCLEI_SDK_SMP > 1:
-        LFLAGS += ' -Wl,--defsym=__SMP_CPU_CNT=%s -Wl,--defsym=__STACK_SIZE=8K' % (NUCLEI_SDK_SMP)
+        LFLAGS += ' -Wl,--defsym=__SMP_CPU_CNT=%s -Wl,--defsym=__STACK_SIZE=4K' % (NUCLEI_SDK_SMP)
     LFLAGS  += ' -u _isatty -u _write -u _sbrk -u _read -u _close -u _fstat -u _lseek '
     CPATH   = ''
     LPATH   = ''
