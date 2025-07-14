@@ -12,7 +12,6 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include "board.h"
-#include "cpuport.h"
 
 #define SYSTICK_TICK_CONST                      (SOC_TIMER_FREQ / RT_TICK_PER_SECOND)
 #define RT_KERNEL_INTERRUPT_LEVEL               1
@@ -35,6 +34,15 @@ extern void *_heap_end;
  */
 extern void _init(void);
 
+/** SW_handler is defined in libcpu/risc-v/common/interrupt_gcc.S */
+extern void SW_handler(void);
+
+void eclic_msip_handler(void)
+{
+    SysTimer_ClearSWIRQ();
+    rt_schedule();
+}
+
 rt_weak void rt_hw_ticksetup(void)
 {
     uint64_t ticks = SYSTICK_TICK_CONST;
@@ -46,13 +54,16 @@ rt_weak void rt_hw_ticksetup(void)
     ECLIC_SetLevelIRQ(SysTimer_IRQn, RT_KERNEL_INTERRUPT_LEVEL);
     ECLIC_SetShvIRQ(SysTimer_IRQn, ECLIC_NON_VECTOR_INTERRUPT);
     ECLIC_EnableIRQ(SysTimer_IRQn);
-
+#ifdef RT_USING_SMP
     /* Set SWI interrupt level to lowest level/priority, SysTimerSW as Vector Interrupt */
-    ECLIC_SetShvIRQ(SysTimerSW_IRQn, ECLIC_VECTOR_INTERRUPT);
+    ECLIC_SetShvIRQ(SysTimerSW_IRQn, ECLIC_NON_VECTOR_INTERRUPT);
     ECLIC_SetLevelIRQ(SysTimerSW_IRQn, RT_KERNEL_INTERRUPT_LEVEL);
     ECLIC_EnableIRQ(SysTimerSW_IRQn);
+    ECLIC_SetVector(SysTimerSW_IRQn, (rv_csr_t)eclic_msip_handler);
+#endif
+    /* Set ECLIC non-vector entry to SW_handler for RT-Thread Porting */
+    __RV_CSR_WRITE(CSR_MTVT2, (unsigned long)SW_handler | 0x1);
 }
-
 
 #define SysTick_Handler     eclic_mtip_handler
 
@@ -102,6 +113,13 @@ void rt_hw_board_init(void)
     /* Board underlying hardware initialization */
 #ifdef RT_USING_COMPONENTS_INIT
     rt_components_board_init();
+#endif
+}
+
+unsigned long __rt_ffsl(unsigned long value)
+{
+#ifdef __GNUC__
+    return __builtin_ffsl(value);
 #endif
 }
 

@@ -10,10 +10,17 @@ source "$(RTT_DIR)/Kconfig"
 osource "$PKGS_DIR/Kconfig"
 rsource "board/Kconfig"
 
-config SOC_DEMOSOC
+config SOC_RISCV_FAMILY_NUCLEI
     bool
-    select ARCH_RISCV
+
+config SOC_NUCLEI_EVALSOC
+    bool
+    # select ARCH_RISCV32
+    select ARCH_RISCV64
+    # select ARCH_RISCV_FPU
+    select SOC_RISCV_FAMILY_NUCLEI
     select PKG_USING_NUCLEI_SDK
     select RT_USING_COMPONENTS_INIT
     select RT_USING_USER_MAIN
+    select RT_USING_HW_ATOMIC
     default y

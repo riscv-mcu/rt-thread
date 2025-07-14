@@ -1,11 +1,5 @@
 menu "Hardware Drivers Config"
 
-config SOC_HUMMINGBIRD
-    bool
-    select SOC_SERIES_HUMMINGBIRD
-    select RT_USING_HW_ATOMIC
-    default y
-
 menu "Onboard Peripheral Drivers"
 
     config BSP_USING_UART_CONSOLE
@@ -25,9 +19,6 @@ menu "On-chip Peripheral Drivers"
             config BSP_USING_UART0
                 bool "Enable UART0"
                 default n
-            config BSP_USING_UART1
-                bool "Enable UART1"
-                default n
         endif
 
 endmenu
@@ -35,5 +26,9 @@ endmenu
 menu "Board extended module Drivers"
 
 endmenu
+
+config __STACKSIZE__
+    int "stack size for interrupt"
+    default 4096
 
 endmenu

@@ -1,6 +1,7 @@
 import os
 import sys
 import rtconfig
+import json
 
 if os.getenv('RTT_ROOT'):
     RTT_ROOT = os.getenv('RTT_ROOT')
@@ -18,7 +19,7 @@ AddOption('--run',
         nargs=1,
         action = 'store',
         default = "",
-        help = 'Upload or debug application using openocd')
+        help = 'Quick evaluate run target command, available targets: upload, debug, qemu')
 
 DefaultEnvironment(tools=[])
 env = Environment(tools = ['mingw'],
@@ -44,6 +45,9 @@ SDK_LIB = libraries_path_prefix
 Export('SDK_LIB')
 
 GDB = rtconfig.GDB
+QEMU = "qemu-system-riscv32"
+if "x" in rtconfig.NUCLEI_SDK_CORE:
+    QEMU = "qemu-system-riscv64"
 
 # prepare building environment
 objs = PrepareBuilding(env, RTT_ROOT)
@@ -53,12 +57,35 @@ rtconfig.BSP_LIBRARY_TYPE = bsp_library_type
 
 if hasattr(rtconfig, 'NUCLEI_SDK_OPENOCD_CFG'):
     openocd_cfg = rtconfig.NUCLEI_SDK_OPENOCD_CFG.replace('\\', '/')
+    try:
+        nuclei_sdk_root = openocd_cfg.split('/SoC/')[0]
+        nuclei_sdk_pkgjson = os.path.join(nuclei_sdk_root, 'package.json')
+        if os.path.isfile(nuclei_sdk_pkgjson):
+            with open(nuclei_sdk_pkgjson, 'r') as f:
+                pkg_info = json.load(f)
+                if 'version' in pkg_info:
+                    print("Nuclei SDK version: {}".format(pkg_info['version']))
+                else:
+                    print("Nuclei SDK package.json does not contain version information.")
+        else:
+            print("ERROR: Nuclei SDK package.json not found at {}".format(nuclei_sdk_pkgjson))
+    except:
+        pass
 else:
     print("ERROR: Nuclei SDK package is not yet downloaded, please execute <pkgs --update> in command line first!")
     exit(0)
 
+if rtconfig.NUCLEI_SDK_SMP > 1:
+    GDBREMOTE = "| openocd --pipe -c 'set SMP {}' -f {}".format(rtconfig.NUCLEI_SDK_SMP, openocd_cfg)
+else:
+    GDBREMOTE = "| openocd --pipe -f {}".format(openocd_cfg)
+if os.getenv('GDBREMOTE'):
+    GDBREMOTE = os.getenv('GDBREMOTE')
+    print("Using customized GDBREMOTE %s" % (GDBREMOTE))
+
 # include hal drivers
-hal_sconscript = os.path.join(libraries_path_prefix, bsp_library_type, 'HAL_Drivers', 'SConscript')
+# for evalsoc and demosoc, share same hal code located in libraries/evalsoc
+hal_sconscript = os.path.join(libraries_path_prefix, 'evalsoc', 'HAL_Drivers', 'SConscript')
 
 if os.path.isfile(hal_sconscript):
     objs.extend(SConscript(hal_sconscript))
@@ -68,23 +95,32 @@ DoBuilding(TARGET, objs)
 
 # Run upload or debug if --run=upload or --upload=debug
 run_target = GetOption('run')
-SUPPORT_RUN_TARGETS = ["upload", "debug"]
+SUPPORT_RUN_TARGETS = ["upload", "debug", "qemu"]
 if run_target in SUPPORT_RUN_TARGETS:
     if os.path.isfile(TARGET):
         if run_target == "upload":
             upload_cmd = '{} {} -ex "set remotetimeout 240" \
-                    -ex "target remote | openocd --pipe -f {}" \
-                    --batch -ex "monitor halt" -ex "monitor flash protect 0 0 last off" -ex "load" \
-                    -ex "monitor resume" -ex "quit"'.format(GDB, TARGET, openocd_cfg)
+                    -ex "target remote {}" \
+                    --batch -ex "monitor reset halt" -ex "thread apply all info reg pc" -ex "thread 1" \
+                    -ex "load {}" -ex "file {}" -ex "thread apply all set $pc=_start" \
+                    -ex "monitor resume" -ex "quit"'.format(GDB, TARGET, GDBREMOTE, TARGET, TARGET)
             print("Upload application {} using openocd and gdb".format(TARGET))
             print(upload_cmd)
             os.system(upload_cmd)
         elif run_target == "debug":
             debug_cmd = '{} {} -ex "set remotetimeout 240" \
-                    -ex "target remote | openocd --pipe -f {}"'.format(GDB, TARGET, openocd_cfg)
+                    -ex "target remote {}"'.format(GDB, TARGET, GDBREMOTE)
             print("Debug application {} using openocd and gdb".format(TARGET))
             print(debug_cmd)
             os.system(debug_cmd)
+        elif run_target == "qemu":
+            qemu_cmd = '{} -M nuclei_evalsoc,download={} -cpu nuclei-{}' \
+                ' -icount shift=0 -nodefaults -smp {} -serial stdio -kernel {}'.\
+                    format(QEMU, rtconfig.NUCLEI_SDK_DOWNLOAD, rtconfig.NUCLEI_SDK_CORE, \
+                        rtconfig.NUCLEI_SDK_SMP, TARGET)
+            print("Run application {} on qemu".format(TARGET))
+            print(qemu_cmd)
+            os.system(qemu_cmd)
     else:
         print(TARGET + ' not exist, please run scons first!!')
     exit(0)
