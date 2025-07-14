@@ -13,7 +13,7 @@
 #include "cpuport.h"
 
     .section .text.entry, "ax"
-#if defined(SOC_SERIES_GD32VF103V)
+#if defined(SOC_SERIES_GD32VF103V) || defined(SOC_RISCV_FAMILY_NUCLEI)
     .align  6
 #else
     .align  2
@@ -108,6 +108,15 @@ SW_handler:
     /* switch to from thread stack */
     csrrw sp,mscratch,sp
 
+#ifdef RT_USING_SMP
+    /* store mepc to the current thread stack */
+    csrr  a0, mepc
+    STORE a0, 0 * REGBYTES(sp)
+    mv a0, sp /* move sp to a0 for context switch */
+    /* do irq switch if needed */
+    call rt_scheduler_do_irq_switch
+    tail   rt_hw_context_switch_exit
+#else
     /* Determine whether to trigger scheduling at the interrupt function */
     la    t0, rt_thread_switch_interrupt_flag
     lw    t2, 0(t0)
@@ -210,7 +219,7 @@ SW_handler:
     addi    sp, sp, 32 * FREGBYTES
 #endif
     mret
-
+#endif
 
   .section      .text.trap_entry
   .align 2

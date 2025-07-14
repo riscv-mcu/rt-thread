@@ -37,6 +37,16 @@ rt_hw_interrupt_enable:
     ret
 
 /*
+ * rt_bool_t rt_hw_interrupt_is_disabled(void);
+ */
+    .globl rt_hw_interrupt_is_disabled
+rt_hw_interrupt_is_disabled:
+    csrr a0, mstatus
+    andi a0, a0, 8
+    seqz a0, a0
+    ret
+
+/*
  * #ifdef RT_USING_SMP
  * void rt_hw_context_switch_to(rt_ubase_t to, stuct rt_thread *to_thread);
  * #else
@@ -47,7 +57,17 @@ rt_hw_interrupt_enable:
  */
     .globl rt_hw_context_switch_to
 rt_hw_context_switch_to:
+#ifdef RT_USING_SMP
+    csrr  t1, mhartid
+    /* switch interrupt stack of current cpu */
+    la    t2, __stack_start__
+    addi  t1, t1, 1
+    li    t3, __STACKSIZE__
+    mul   t0, t1, t3
+    add   t0, t2, t0 /* t0 = (cpuid + 1) * __STACKSIZE__ + __stack_start__ */
+#else
     la t0, __rt_rvstack
+#endif
 #ifdef SOC_RISCV_FAMILY_CH32
 /* 
  * if it is an assembly entry code, the SP offset value is determined by the assembly code,

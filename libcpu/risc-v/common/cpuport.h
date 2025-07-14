@@ -14,9 +14,13 @@
 #ifndef CPUPORT_H__
 #define CPUPORT_H__
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 #include <rtconfig.h>
 
-#ifndef __ASSEMBLY__
+#ifndef __ASSEMBLER__
 #ifdef RT_USING_SMP
 typedef union {
     unsigned long slock;
@@ -64,6 +68,10 @@ typedef union {
 #define FREGBYTES               4
 #define rv_floatreg_t           rt_int32_t
 #endif
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
