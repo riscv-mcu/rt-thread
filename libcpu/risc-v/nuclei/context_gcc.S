@@ -12,7 +12,7 @@
 #include <rtconfig.h>
 
 #ifndef __riscv_32e
-#define RT_SAVED_REGNUM         30
+#define RT_SAVED_REGNUM         32
 #else
 #define RT_SAVED_REGNUM         14
 #endif
