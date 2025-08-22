@@ -42,7 +42,8 @@ rt_uint8_t *rt_hw_stack_init(void       *tentry,
     int                i;
 
     stk  = stack_addr + sizeof(rt_ubase_t);
-    stk  = (rt_uint8_t *)RT_ALIGN_DOWN((rt_ubase_t)stk, REGBYTES);
+    // align to 16 bytes for task sp to match psabi requirement
+    stk  = (rt_uint8_t *)RT_ALIGN_DOWN((rt_ubase_t)stk, 16);
     stk -= sizeof(struct rt_hw_stack_frame);
 
     frame = (struct rt_hw_stack_frame *)stk;
