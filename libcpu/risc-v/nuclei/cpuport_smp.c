@@ -19,30 +19,63 @@ int rt_hw_cpu_id(void)
     return __RV_CSR_READ(CSR_MHARTID);
 }
 
+/**
+ * @brief Initialize a spin lock
+ * 
+ * This function initializes a spin lock by setting its value to 0,
+ * making it available for acquisition. A memory barrier is executed
+ * before initialization to ensure proper synchronization in SMP systems.
+ * 
+ * @param lock Pointer to the spin lock structure to be initialized
+ */
 void rt_hw_spin_lock_init(rt_hw_spinlock_t *lock)
 {
     lock->slock = 0;
     __SMP_RWMB();
-
 }
 
+/**
+ * @brief Acquire a spin lock
+ * @param lock Pointer to the spin lock structure
+ */
 void rt_hw_spin_lock(rt_hw_spinlock_t *lock)
 {
     do {
+        /* Keep checking if lock is held by another core */
+        while (lock->slock) {
+            __NOP(); /* CPU pause/yield while waiting */
+        }
+
+        /* Attempt to acquire the lock using atomic swap operation */
 #if __riscv_xlen == 64
+        /* For 64-bit RISC-V cores */
         if (__AMOSWAP_D(&(lock->slock), 1) == 0) {
 #else
+        /* For 32-bit RISC-V cores */
         if (__AMOSWAP_W(&(lock->slock), 1) == 0) {
 #endif
-            break;
+            /* Memory barrier to ensure lock acquisition is visible to all cores */
+            __SMP_RWMB();
+            break;  /* Lock acquired successfully */
         }
+        /* If lock acquisition failed, retry from the beginning */
     } while (1);
 }
 
+/**
+ * @brief Release a spinlock
+ * 
+ * This function releases the previously acquired spinlock. It ensures proper memory 
+ * ordering by using a read/write memory barrier before releasing the lock.
+ * 
+ * @param lock Pointer to the spinlock structure to be unlocked
+ * 
+ * @note This function should only be called after acquiring the spinlock using rt_hw_spin_lock()
+ */
 void rt_hw_spin_unlock(rt_hw_spinlock_t *lock)
 {
-    lock->slock = 0;
     __SMP_RWMB();
+    lock->slock = 0;
 }
 
 
