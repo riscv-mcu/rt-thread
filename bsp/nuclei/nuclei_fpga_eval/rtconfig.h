@@ -62,7 +62,8 @@
 /* end of rt_strnlen options */
 /* end of klibc options */
 #define RT_NAME_MAX 8
-#define RT_CPUS_NR 1
+#define RT_USING_SMP
+#define RT_CPUS_NR 4
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_256
 #define RT_THREAD_PRIORITY_MAX 256
@@ -74,6 +75,7 @@
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 1024
+#define SYSTEM_THREAD_STACK_SIZE 2048
 #define RT_USING_TIMER_SOFT
 #define RT_TIMER_THREAD_PRIO 4
 #define RT_TIMER_THREAD_STACK_SIZE 4096
@@ -105,21 +107,22 @@
 #define RT_USING_HEAP
 /* end of Memory Management */
 #define RT_USING_DEVICE
+#define RT_USING_DEVICE_OPS
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 1024
 #define RT_CONSOLE_DEVICE_NAME "uart0"
 #define RT_VER_NUM 0x50201
 #define RT_BACKTRACE_LEVEL_MAX_NR 32
 /* end of RT-Thread Kernel */
+#define ARCH_CPU_64BIT
 #define RT_USING_HW_ATOMIC
 #define ARCH_RISCV
-#define ARCH_RISCV32
 
 /* RT-Thread Components */
 
 #define RT_USING_COMPONENTS_INIT
 #define RT_USING_USER_MAIN
-#define RT_MAIN_THREAD_STACK_SIZE 1024
+#define RT_MAIN_THREAD_STACK_SIZE 1536
 #define RT_MAIN_THREAD_PRIORITY 10
 #define RT_USING_MSH
 #define RT_USING_FINSH
@@ -143,8 +146,8 @@
 #define DFS_USING_WORKDIR
 #define DFS_FD_MAX 16
 #define RT_USING_DFS_V1
-#define DFS_FILESYSTEMS_MAX 2
-#define DFS_FILESYSTEM_TYPES_MAX 2
+#define DFS_FILESYSTEMS_MAX 4
+#define DFS_FILESYSTEM_TYPES_MAX 4
 #define RT_USING_DFS_DEVFS
 /* end of DFS: device virtual file system */
 
@@ -204,6 +207,9 @@
 
 /* Utilities */
 
+#define RT_USING_UTEST
+#define UTEST_THR_STACK_SIZE 4096
+#define UTEST_THR_PRIORITY 20
 /* end of Utilities */
 
 /* Using USB legacy version */
@@ -213,6 +219,70 @@
 
 /* RT-Thread Utestcases */
 
+#define RT_USING_UTESTCASES
+
+/* Utest Self Testcase */
+
+#define UTEST_SELF_PASS_TC
+/* end of Utest Self Testcase */
+
+/* Kernel Testcase */
+
+#define UTEST_SMALL_MEM_TC
+#define UTEST_SEMAPHORE_TC
+#define UTEST_EVENT_TC
+#define UTEST_TIMER_TC
+#define UTEST_MESSAGEQUEUE_TC
+#define UTEST_SIGNAL_TC
+#define UTEST_MUTEX_TC
+#define UTEST_MAILBOX_TC
+#define UTEST_THREAD_TC
+#define UTEST_DEVICE_TC
+#define UTEST_ATOMIC_TC
+#define UTEST_HOOKLIST_TC
+#define UTEST_MTSAFE_KPRINT_TC
+#define UTEST_SCHEDULER_TC
+
+/* Kernel SMP Testcase */
+
+#define UTEST_SMP_AFFFINITY_TC
+#define UTEST_SMP_ASSIGNED_IDLE_CORE_TC
+#define UTEST_SMP_SPINLOCK_TC
+#define UTEST_SMP_THREAD_PREEMPTION_TC
+/* end of Kernel SMP Testcase */
+/* end of Kernel Testcase */
+
+/* CPP11 Testcase */
+
+/* end of CPP11 Testcase */
+
+/* Utest Serial Testcase */
+
+/* end of Utest Serial Testcase */
+
+/* Serial-Bypass Testcase */
+
+/* end of Serial-Bypass Testcase */
+
+/* Utest IPC Testcase */
+
+/* end of Utest IPC Testcase */
+
+/* RTT Posix Testcase */
+
+/* end of RTT Posix Testcase */
+
+/* Memory Management Subsytem Testcase */
+
+/* end of Memory Management Subsytem Testcase */
+
+/* Tmpfs Testcase */
+
+/* end of Tmpfs Testcase */
+
+/* SMP-Call Testcase */
+
+/* end of SMP-Call Testcase */
 /* end of RT-Thread Utestcases */
 
 /* RT-Thread online packages */

@@ -35,10 +35,10 @@ NUCLEI_SDK_BOARD = "nuclei_fpga_eval"
 # Configurable options below
 # TODO: Change NUCLEI_SDK_CORE NUCLEI_SDK_SMP and NUCLEI_SDK_DOWNLOAD according to your cpu configuration
 # CORE: See https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#core
-NUCLEI_SDK_CORE = "n900fd"
+NUCLEI_SDK_CORE = "nx900fd"
 # TODO: If you want to run RT-Thread SMP, you need to set NUCLEI_SDK_SMP to 2 or more to match your CPU count.
 # TODO: And you also need to execute `menuconfig` to enable SMP support in RT-Thread and set Number of CPUs to match NUCLEI_SDK_SMP.
-NUCLEI_SDK_SMP = 1
+NUCLEI_SDK_SMP = 4
 
 # DOWNLOAD: https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download
 # You can change the DOWNLOAD mode to use different linker script in nuclei sdk
