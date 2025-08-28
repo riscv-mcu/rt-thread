@@ -97,6 +97,7 @@ SW_handler:
     STORE x30, 30 * REGBYTES(sp)
     STORE x31, 31 * REGBYTES(sp)
 #endif
+    /* TODO: interrupt nesting not yet supported */
     /* switch to interrupt stack */
     csrrw sp,mscratch,sp
     /* interrupt handle */
