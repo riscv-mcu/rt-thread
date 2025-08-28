@@ -58,6 +58,20 @@ rt_hw_interrupt_is_disabled:
     .globl rt_hw_context_switch_to
 rt_hw_context_switch_to:
 #ifdef RT_USING_SMP
+#if defined(SOC_RISCV_FAMILY_NUCLEI)
+    lui t1, %hi(__STACK_SIZE)
+    addi t1, t1, %lo(__STACK_SIZE)
+    la t0, _sp
+    csrr t2, mhartid
+    andi t2, t2, 0xFF
+    li a4, 0
+1:
+    beq t2, a4, 2f
+    sub t0, t0, t1
+    addi a4, a4, 1
+    j 1b
+2:
+#else
     csrr  t1, mhartid
     /* switch interrupt stack of current cpu */
     la    t2, __stack_start__
@@ -65,6 +79,7 @@ rt_hw_context_switch_to:
     li    t3, __STACKSIZE__
     mul   t0, t1, t3
     add   t0, t2, t0 /* t0 = (cpuid + 1) * __STACKSIZE__ + __stack_start__ */
+#endif
 #else
     la t0, __rt_rvstack
 #endif
@@ -236,8 +251,12 @@ rt_hw_context_switch_interrupt:
 rt_hw_context_switch_exit:
 #ifdef RT_USING_SMP
 #ifdef RT_USING_SIGNALS
+    /* switch to interrupt stack temporarily */
     mv a0, sp
-
+#if defined(SOC_RISCV_FAMILY_NUCLEI)
+    /* mscratch is already set in rt_hw_context_switch_to, so we just read mscratch to sp */
+    csrr sp, mscratch
+#else
     csrr  t0, mhartid
     /* switch interrupt stack of current cpu */
     la    sp, __stack_start__
@@ -245,8 +264,9 @@ rt_hw_context_switch_exit:
     li    t2, __STACKSIZE__
     mul   t1, t1, t2
     add   sp, sp, t1 /* sp = (cpuid + 1) * __STACKSIZE__ + __stack_start__ */
-
+#endif
     call rt_signal_check
+    /* switch back to task stack */
     mv sp, a0
 #endif
 #endif

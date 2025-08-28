@@ -313,6 +313,20 @@ trap_entry:
     move  s0, sp
 
 #ifdef RT_USING_SMP
+#if defined(SOC_RISCV_FAMILY_NUCLEI)
+    lui t1, %hi(__STACK_SIZE)
+    addi t1, t1, %lo(__STACK_SIZE)
+    la sp, _sp
+    csrr t2, mhartid
+    andi t2, t2, 0xFF
+    li a4, 0
+1:
+    beq t2, a4, 2f
+    sub sp, sp, t1
+    addi a4, a4, 1
+    j 1b
+2:
+#else
     /* get cpu id */
     csrr  t0, mhartid
 
@@ -322,6 +336,7 @@ trap_entry:
     li    t2, __STACKSIZE__
     mul   t1, t1, t2
     add   sp, sp, t1 /* sp = (cpuid + 1) * __STACKSIZE__ + __stack_start__ */
+#endif
 #endif
 
     /* handle interrupt */
