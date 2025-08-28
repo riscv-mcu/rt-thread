@@ -17,9 +17,7 @@ config SOC_NUCLEI_EVALSOC
     bool
     ## TODO select RV32 or RV64
     ## according to your real SoC
-    # select ARCH_RISCV32
-    select ARCH_RISCV
-    select ARCH_CPU_64BIT
+    select ARCH_RISCV32
     # select ARCH_RISCV64
     ## TODO enable ARCH_RISCV_FPU if you
     ## want to save fpu stack during interrupt
