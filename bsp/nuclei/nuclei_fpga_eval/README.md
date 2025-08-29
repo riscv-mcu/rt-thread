@@ -75,7 +75,9 @@ export PATH=~/NucleiStudio/toolchain/gcc/bin:~/NucleiStudio/toolchain/openocd/bi
 ### 编译程序
 
 > [!NOTE]
-> 请注意由于v5.2.1移植是基于RT-Thread官方标准移植，因此中断嵌套是没有实现的，参见 https://github.com/RT-Thread/rt-thread/issues/10457
+> - 请注意由于v5.2.1移植是基于RT-Thread官方标准移植，因此中断嵌套是没有实现的，参见 https://github.com/RT-Thread/rt-thread/issues/10457
+> - Nuclei RISC-V SMP的移植中，每个CPU的中断栈配置与官方默认移植有所不同。这是因为我们使用了Nuclei SDK，其中多核启动时已经预先配置好了每个CPU的栈。
+>   保持这种配置可以避免在启动过程中因栈配置不一致而导致不同CPU的栈被交叉污染，从而防止出现随机运行错误。
 
 下载好[RT-Thread](https://github.com/riscv-mcu/rt-thread/issues/1)的代码和[ENV工具](https://www.rt-thread.org/document/site/#/development-tools/env/env)以后。
 
@@ -104,7 +106,7 @@ git clone -b nuclei/v5.2.1 https://github.com/riscv-mcu/rt-thread.git
    - 修改 ``rtconfig.py`` 文件中的 ``NUCLEI_SDK_DOWNLOAD``参数设置为不同的[运行模式](https://doc.nucleisys.com/nuclei_sdk/develop/buildsystem.html#download)，例如下载到ILM/DLM上，下载到SRAM上，下载到DDR上。
      > 这个大小实际是由下载的Nuclei SDK Package里面的链接脚本决定，eg. ``packages\nuclei_sdk-latest\SoC\evalsoc\Board\nuclei_fpga_eval\Source\GCC\gcc_evalsoc_ilm.ld``
    - 修改 ``Kconfig`` 文件中的 ``config SOC_NUCLEI_EVALSOC`` 下面的配置，请根据你是32位还是64位来选择使能 ``ARCH_RISCV32`` 还是 ``ARCH_RISCV64``
-   - 上述修改完毕后，**必须** 运行一下 ``scons --menuconfig`` 来修改配置，如果需要运行SMP则必须要配置下  `RT-Thread Kernel` -> `Enable SMP` + `Number of CPUs`选择正确SMP核心个数。
+   - 务必注意，修改了``KConfig``文件以后，**必须** 运行一下 ``scons --menuconfig`` 来修改更新RTT配置，如果需要运行SMP则必须要配置下  `RT-Thread Kernel` -> `Enable SMP` + `Number of CPUs`选择正确SMP核心个数。
 3. **务必** 运行 ``scons -c``清理之前的编译结果，然后再运行 ``scons``来编译代码, 如果电脑性能足够可以使用 ``scons -j8``来加速编译。
 
 ### 下载程序
