@@ -98,7 +98,7 @@ git clone -b nuclei/lts-v4.1.x https://github.com/riscv-mcu/rt-thread.git
 
 1. 运行 ``pkgs --update``来下载最新的依赖的**Nuclei SDK**, 如果下载失败，可能需要先执行 `menuconfig` 命令来更新`.config`文件(注意需要保存)，因为依赖的SDK的位置可能被上游更新。
 2. **可选**: 运行 ``menuconfig``来进行内核配置, 如果有**SMP需求**，则需要进行如下修改
-   - `menuconfig` 配置 `RT-Thread Kernel` -> `Enable SMP` + `Number of CPUs` 配置正确的CPU Core个数
+   - `menuconfig` 配置 `RT-Thread Kernel` -> `Enable SMP` + `Number of CPUs` 配置正确的CPU Core个数, 其他关于每个任务栈的配置也请在menuconfig中设置好，避免栈大小不够导致任务栈溢出。
    - 修改 `rtconfig.py` 里面的 `NUCLEI_SDK_SMP` 为实际运行的CPU个数，如果是SMP运行，运行模式只能是sram或者ddr模式，为了确保所有core可以访问共享的存储区域
 3. **务必** 运行 ``scons -c``清理之前的编译结果
 4. 根据你当前评估的Nuclei RISC-V内核情况，修改 ``rtconfig.py``中的``NUCLEI_SDK_CORE``和``NUCLEI_SDK_DOWNLOAD``参数。

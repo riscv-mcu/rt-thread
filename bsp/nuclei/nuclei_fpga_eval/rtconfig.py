@@ -73,7 +73,8 @@ if PLATFORM == 'gcc':
     LFLAGS  = ' --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,--gc-sections '
     LFLAGS += ' -Wl,-cref,-Map=rtthread.map '
     if NUCLEI_SDK_SMP > 1:
-        LFLAGS += ' -Wl,--defsym=__SMP_CPU_CNT=%s ' % (NUCLEI_SDK_SMP)
+        # set stack size to 4K for each cpu, change 4k to your stack size for each cpu before main and during interrupt and exception
+        LFLAGS += ' -Wl,--defsym=__SMP_CPU_CNT=%s -Wl,--defsym=__STACK_SIZE=4K' % (NUCLEI_SDK_SMP)
     LFLAGS  += ' -u _isatty -u _write -u _sbrk -u _read -u _close -u _fstat -u _lseek '
     CPATH   = ''
     LPATH   = ''
